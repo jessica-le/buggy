@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
@@ -54,21 +54,21 @@ jobs:
 
       - name: Upload Windows artifact
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Buggy-Windows
           path: release/Buggy-Windows.zip
 
       - name: Upload macOS Intel artifact
         if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Buggy-macOS-Intel
           path: release/Buggy-macOS-Intel.zip
 
       - name: Upload macOS Apple Silicon artifact
         if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Buggy-macOS-AppleSilicon
           path: release/Buggy-macOS-AppleSilicon.zip
