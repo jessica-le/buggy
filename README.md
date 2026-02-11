@@ -1,7 +1,6 @@
 # 🌿 Your Focus Creature
 
-A homegrown Kiki.Computer for Windows. A snarky little monster that lives on
-your screen and makes sure you actually work.
+A little buggy monster who lives on your desktop and wants you to focus...
 
 ---
 
