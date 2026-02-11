@@ -3,12 +3,9 @@ dist/
 dist*/
 build*/
 build-final/
+release/
 *.dmg
-*.exe
 *.AppImage
-
-# Dependencies
-node_modules/
 
 # Electron builder cache
 .cache/
@@ -27,3 +24,8 @@ npm-debug.log*
 
 # Temp files
 nul
+clear-icon-cache.bat
+focused.png
+
+# Local development
+.claude/

@@ -28,11 +28,11 @@ jobs:
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
-        run: npx electron-packager . Buggy --platform=win32 --arch=x64 --out=release --overwrite --icon=src/assets/sprites/icon.ico --ignore="dist.*|node_modules|\.git|\.claude|build.*|release"
+        run: npx electron-packager . Buggy --platform=win32 --arch=x64 --out=release --overwrite --icon=src/assets/sprites/icon.ico
 
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
-        run: npx electron-packager . Buggy --platform=darwin --arch=x64,arm64 --out=release --overwrite --ignore="dist.*|node_modules|\.git|\.claude|build.*|release"
+        run: npx electron-packager . Buggy --platform=darwin --arch=x64,arm64 --out=release --overwrite
 
       - name: Create Windows ZIP
         if: matrix.os == 'windows-latest'
