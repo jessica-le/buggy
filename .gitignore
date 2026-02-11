@@ -1,0 +1,29 @@
+# Build outputs
+dist/
+dist*/
+build*/
+build-final/
+*.dmg
+*.exe
+*.AppImage
+
+# Dependencies
+node_modules/
+
+# Electron builder cache
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp files
+nul

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="forest">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buggy</title>
+  <link rel="stylesheet" href="themes.css" />
+</head>
+<body>
+  <div class="card">
+    <button class="minimize-btn" onclick="minimizeWindow()" title="Minimize">─</button>
+    <button class="close-btn" onclick="window.close()">✕</button>
+
+    <!-- Theme switcher -->
+    <div class="theme-switcher">
+      <div class="theme-pill active" data-t="forest" title="Forest" onclick="setTheme('forest')"></div>
+      <div class="theme-pill" data-t="babyblue" title="Baby Blue" onclick="setTheme('babyblue')"></div>
+      <div class="theme-pill" data-t="gingham" title="Gingham" onclick="setTheme('gingham')"></div>
+    </div>
+
+    <!-- Today's Stats -->
+    <div class="stats-section" id="stats-section">
+      <div class="stats-header">
+        <div class="stats-main">
+          <span class="stats-hours" id="stats-hours">0h 0m</span>
+          <span class="stats-label">focused today</span>
+        </div>
+        <div class="stats-streak" id="stats-streak">
+          <span class="streak-flame">🔥</span>
+          <span class="streak-count">0</span>
+          <span class="streak-label">day streak</span>
+        </div>
+      </div>
+      <div class="stats-garden" id="stats-garden"></div>
+      <div class="stats-sessions" id="stats-sessions"></div>
+    </div>
+
+    <!-- Creature with speech bubble -->
+    <div class="creature-header">
+      <div class="creature-sprite" id="sprite">
+        <img src="../assets/sprites/idle.png" id="sprite-img" />
+      </div>
+      <div class="creature-speech" id="speech-bubble">
+        Hey! What are we working on today?
+      </div>
+    </div>
+
+    <!-- Task input -->
+    <label>What are you actually working on?</label>
+    <input type="text" id="task-input" placeholder="e.g. Write essay introduction" maxlength="80" />
+
+    <!-- Session goal (what does done look like?) -->
+    <div class="goal-section" id="goal-section">
+      <input type="text" id="goal-input" placeholder="What does done look like? (optional)" maxlength="100" />
+    </div>
+
+    <!-- Duration -->
+    <label>Duration</label>
+    <div class="duration-row">
+      <button class="duration-btn tiny" data-minutes="5">just start</button>
+      <button class="duration-btn" data-minutes="15">15m</button>
+      <button class="duration-btn active" data-minutes="25">25m</button>
+      <button class="duration-btn" data-minutes="45">45m</button>
+      <button class="duration-btn" data-minutes="60">60m</button>
+      <div class="custom-duration">
+        <input type="number" id="custom-minutes" placeholder="##" min="1" max="180" />
+        <span>m</span>
+      </div>
+      <button class="duration-btn flow-btn" data-minutes="0" data-flow="true">∞ flow</button>
+    </div>
+
+    <!-- Block mode (hidden in flow mode) -->
+    <div id="block-mode-section">
+      <label>Block mode</label>
+      <div class="mode-row">
+        <button class="mode-btn active" data-mode="gentle">
+          <div class="mode-title">😤 Gentle</div>
+          Nags you with notifications.
+        </button>
+        <button class="mode-btn" data-mode="hard">
+          <div class="mode-title">🔒 Hard</div>
+          Actually blocks sites.
+        </button>
+      </div>
+
+      <!-- Sites to block -->
+      <div class="sites-area">
+        <label>Sites to block</label>
+        <div class="preset-sites">
+          <button class="preset-btn" onclick="togglePreset('instagram.com')">Instagram</button>
+          <button class="preset-btn" onclick="togglePreset('twitter.com')">Twitter/X</button>
+          <button class="preset-btn" onclick="togglePreset('facebook.com')">Facebook</button>
+          <button class="preset-btn" onclick="togglePreset('reddit.com')">Reddit</button>
+          <button class="preset-btn" onclick="togglePreset('youtube.com')">YouTube</button>
+          <button class="preset-btn" onclick="togglePreset('tiktok.com')">TikTok</button>
+          <button class="preset-btn" onclick="togglePreset('twitch.tv')">Twitch</button>
+          <button class="preset-btn" onclick="togglePreset('discord.com')">Discord</button>
+          <button class="preset-btn" onclick="togglePreset('tumblr.com')">Tumblr</button>
+          <button class="preset-btn" onclick="togglePreset('are.na')">Are.na</button>
+          <button class="preset-btn" onclick="togglePreset('neocities.org')">Neocities</button>
+        </div>
+        <div class="site-tags" id="site-tags"></div>
+        <div class="site-input-row">
+          <input type="text" id="site-input" placeholder="add site..." />
+          <button class="add-btn" onclick="addSite()">+</button>
+        </div>
+      </div>
+
+      <!-- Apps to block -->
+      <div class="sites-area">
+        <label>Desktop apps to block</label>
+        <div class="preset-sites">
+          <button class="preset-btn app-btn" onclick="toggleApp('Discord')">Discord</button>
+          <button class="preset-btn app-btn" onclick="toggleApp('Spotify')">Spotify</button>
+          <button class="preset-btn app-btn" onclick="toggleApp('Steam')">Steam</button>
+        </div>
+        <div class="site-tags" id="app-tags"></div>
+        <div class="site-input-row">
+          <input type="text" id="app-input" placeholder="add app..." />
+          <button class="add-btn" onclick="addApp()">+</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startSession()" disabled>
+      Start Session
+    </button>
+  </div>
+
+  <script>
+    let selectedMinutes = 25
+    let selectedMode = 'gentle'
+    let isFlowMode = false
+    let blockedSites = []
+    let blockedApps = []
+
+    // Load saved data
+    const savedTasks = JSON.parse(localStorage.getItem('buggy-tasks') || '[]')
+    const savedSites = JSON.parse(localStorage.getItem('buggy-sites') || '[]')
+    const savedApps = JSON.parse(localStorage.getItem('buggy-apps') || '[]')
+    blockedSites = [...savedSites]
+    blockedApps = [...savedApps]
+
+    function minimizeWindow() {
+      window.creature.minimizeLauncher()
+    }
+
+    function setTheme(t) {
+      document.documentElement.setAttribute('data-theme', t)
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.t === t))
+      localStorage.setItem('buggy-theme', t)
+    }
+    const saved = localStorage.getItem('buggy-theme')
+    if (saved) setTheme(saved)
+
+    window.creature.getSnark('idle')
+    window.creature.onSnarkMessage(msg => {
+      document.getElementById('speech-bubble').textContent = msg
+    })
+
+    const taskInput = document.getElementById('task-input')
+    const startBtn = document.getElementById('start-btn')
+    taskInput.addEventListener('input', () => { startBtn.disabled = taskInput.value.trim().length < 3 })
+    taskInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !startBtn.disabled) startSession() })
+
+    // ESC key to close window
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const hasUnsavedInput = taskInput.value.trim().length > 0
+        if (hasUnsavedInput) {
+          if (confirm('Close without starting session?')) {
+            window.close()
+          }
+        } else {
+          window.close()
+        }
+      }
+    })
+
+    // Duration buttons
+    const customInput = document.getElementById('custom-minutes')
+
+    document.querySelectorAll('.duration-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'))
+        document.querySelector('.custom-duration').classList.remove('active')
+        customInput.value = ''
+        btn.classList.add('active')
+        selectedMinutes = parseInt(btn.dataset.minutes)
+        isFlowMode = btn.dataset.flow === 'true'
+
+        // Hide/show block mode section for flow mode
+        document.getElementById('block-mode-section').style.display = isFlowMode ? 'none' : 'block'
+      })
+    })
+
+    // Custom duration input
+    customInput.addEventListener('focus', () => {
+      document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'))
+      document.querySelector('.custom-duration').classList.add('active')
+      isFlowMode = false
+      document.getElementById('block-mode-section').style.display = 'block'
+    })
+    customInput.addEventListener('input', () => {
+      const val = parseInt(customInput.value)
+      if (val > 0 && val <= 180) {
+        selectedMinutes = val
+      }
+    })
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        selectedMode = btn.dataset.mode
+      })
+    })
+
+    // Sites
+    function renderTags() {
+      const c = document.getElementById('site-tags')
+      c.innerHTML = ''
+      blockedSites.forEach((site, i) => {
+        const tag = document.createElement('div')
+        tag.className = 'site-tag'
+        tag.innerHTML = `${site} <button onclick="removeSite(${i})">✕</button>`
+        c.appendChild(tag)
+      })
+      updatePresetButtons()
+    }
+    function addSite() {
+      const input = document.getElementById('site-input')
+      const site = input.value.trim().replace(/^https?:\/\//, '').replace(/^www\./, '')
+      if (site && !blockedSites.includes(site)) { blockedSites.push(site); renderTags() }
+      input.value = ''; input.focus()
+    }
+    function removeSite(i) { blockedSites.splice(i, 1); renderTags() }
+    function togglePreset(site) {
+      const idx = blockedSites.indexOf(site)
+      if (idx >= 0) blockedSites.splice(idx, 1)
+      else blockedSites.push(site)
+      renderTags()
+    }
+    function updatePresetButtons() {
+      document.querySelectorAll('.preset-btn:not(.app-btn)').forEach(btn => {
+        const match = btn.onclick.toString().match(/'([^']+)'/)
+        if (match) btn.classList.toggle('active', blockedSites.includes(match[1]))
+      })
+      document.querySelectorAll('.preset-btn.app-btn').forEach(btn => {
+        const match = btn.onclick.toString().match(/'([^']+)'/)
+        if (match) btn.classList.toggle('active', blockedApps.includes(match[1]))
+      })
+    }
+    document.getElementById('site-input').addEventListener('keydown', e => { if (e.key === 'Enter') addSite() })
+
+    // Apps
+    function renderAppTags() {
+      const c = document.getElementById('app-tags')
+      c.innerHTML = ''
+      blockedApps.forEach((app, i) => {
+        const tag = document.createElement('div')
+        tag.className = 'site-tag'
+        tag.innerHTML = `${app} <button onclick="removeApp(${i})">✕</button>`
+        c.appendChild(tag)
+      })
+      updatePresetButtons()
+    }
+    function addApp() {
+      const input = document.getElementById('app-input')
+      const app = input.value.trim()
+      if (app && !blockedApps.includes(app)) { blockedApps.push(app); renderAppTags() }
+      input.value = ''; input.focus()
+    }
+    function removeApp(i) { blockedApps.splice(i, 1); renderAppTags() }
+    function toggleApp(app) {
+      const idx = blockedApps.indexOf(app)
+      if (idx >= 0) blockedApps.splice(idx, 1)
+      else blockedApps.push(app)
+      renderAppTags()
+    }
+    document.getElementById('app-input').addEventListener('keydown', e => { if (e.key === 'Enter') addApp() })
+
+    // Initial render
+    renderTags()
+    renderAppTags()
+
+    // Garden flowers based on focus time
+    function renderGarden(totalMinutes, completedCount, streak) {
+      const garden = document.getElementById('stats-garden')
+
+      if (totalMinutes === 0) {
+        garden.innerHTML = '<div class="garden-empty">Your garden is waiting to bloom...</div>'
+        return
+      }
+
+      // Different flower types with personality
+      const flowers = ['🌸', '🌼', '🌺', '🌻', '🌷', '💐', '🌹', '🪻', '🪷']
+      const specialFlowers = ['🌈', '✨', '🦋', '🐝', '🌟']
+      const tinyPlants = ['🌱', '🍀', '🌿', '☘️']
+
+      let gardenHTML = ''
+
+      // Base flowers from time (every 15 mins = 1 flower, varies by time of day)
+      const baseFlowers = Math.floor(totalMinutes / 15)
+      const hour = new Date().getHours()
+
+      for (let i = 0; i < baseFlowers && i < 12; i++) {
+        // Pick flower based on a mix of factors for variety
+        const seed = (totalMinutes * 7 + i * 13 + hour) % flowers.length
+        const flower = flowers[seed]
+        const size = (i % 3 === 0) ? 'big' : (i % 4 === 0) ? 'small' : ''
+        gardenHTML += `<span class="garden-flower ${size}">${flower}</span>`
+      }
+
+      // Streak bonus: butterflies and sparkles for streaks
+      if (streak >= 3) {
+        gardenHTML += `<span class="garden-flower">${specialFlowers[streak % specialFlowers.length]}</span>`
+      }
+      if (streak >= 7) {
+        gardenHTML += `<span class="garden-flower big">🦋</span>`
+      }
+
+      // Early bird or night owl bonus
+      if (hour < 9 && totalMinutes > 0) {
+        gardenHTML += `<span class="garden-flower">🌅</span>`
+      } else if (hour >= 22 && totalMinutes > 0) {
+        gardenHTML += `<span class="garden-flower">🌙</span>`
+      }
+
+      // Completion bonus: extra special for 3+ completed sessions
+      if (completedCount >= 3) {
+        gardenHTML += `<span class="garden-flower big">✨</span>`
+      }
+
+      // If still sparse, add some tiny plants
+      if (baseFlowers < 3 && totalMinutes > 0) {
+        const sprouts = Math.min(3, 3 - baseFlowers)
+        for (let i = 0; i < sprouts; i++) {
+          gardenHTML += `<span class="garden-flower small">${tinyPlants[i % tinyPlants.length]}</span>`
+        }
+      }
+
+      garden.innerHTML = gardenHTML
+    }
+
+    // Load and display stats
+    async function loadStats() {
+      try {
+        const stats = await window.creature.getStats()
+        const hours = Math.floor(stats.totalMinutes / 60)
+        const mins = stats.totalMinutes % 60
+        document.getElementById('stats-hours').textContent = `${hours}h ${mins}m`
+        document.querySelector('.streak-count').textContent = stats.streak
+
+        // Render garden
+        renderGarden(stats.totalMinutes, stats.completedCount, stats.streak)
+
+        // Top sessions (sorted by duration, show top 3-4)
+        const sessionsEl = document.getElementById('stats-sessions')
+        if (!stats.tasks || stats.tasks.length === 0) {
+          sessionsEl.innerHTML = ''
+        } else {
+          // Sort by minutes descending, take top 4
+          const topSessions = [...stats.tasks]
+            .sort((a, b) => b.minutes - a.minutes)
+            .slice(0, 4)
+            .filter(t => t.minutes > 0)
+
+          if (topSessions.length === 0) {
+            sessionsEl.innerHTML = ''
+          } else {
+            sessionsEl.innerHTML = topSessions.map(t =>
+              `<div class="stats-session-item"><span class="session-task">${t.task}</span><span class="session-time">${t.minutes}m</span></div>`
+            ).join('')
+          }
+        }
+      } catch (e) {
+        console.log('Could not load stats:', e)
+      }
+    }
+    loadStats()
+
+    // Idle/sleep behavior
+    let idleTimer = null
+    let isSleeping = false
+    function resetIdleTimer() {
+      if (isSleeping) {
+        isSleeping = false
+        document.getElementById('sprite-img').src = '../assets/sprites/idle.png'
+        window.creature.getSnark('idle')
+      }
+      clearTimeout(idleTimer)
+      idleTimer = setTimeout(() => {
+        isSleeping = true
+        document.getElementById('sprite-img').src = '../assets/sprites/sleeping.png'
+        document.getElementById('speech-bubble').textContent = 'zzz...'
+      }, 120000)
+    }
+    document.addEventListener('mousemove', resetIdleTimer)
+    document.addEventListener('keydown', resetIdleTimer)
+    document.addEventListener('click', resetIdleTimer)
+    resetIdleTimer()
+
+    function startSession() {
+      const task = taskInput.value.trim()
+      if (!task) return
+
+      // Save task to recent list
+      const idx = savedTasks.indexOf(task)
+      if (idx >= 0) savedTasks.splice(idx, 1)
+      savedTasks.unshift(task)
+      if (savedTasks.length > 20) savedTasks.pop()
+      localStorage.setItem('buggy-tasks', JSON.stringify(savedTasks))
+
+      // Save sites and apps
+      localStorage.setItem('buggy-sites', JSON.stringify(blockedSites))
+      localStorage.setItem('buggy-apps', JSON.stringify(blockedApps))
+
+      const theme = document.documentElement.getAttribute('data-theme')
+      const sessionGoal = document.getElementById('goal-input').value.trim()
+
+      window.creature.startSession({
+        task,
+        sessionGoal,
+        blockedSites,
+        blockedApps,
+        blockMode: selectedMode,
+        durationMinutes: selectedMinutes,
+        theme,
+        isFlowMode
+      })
+    }
+  </script>
+</body>
+</html>

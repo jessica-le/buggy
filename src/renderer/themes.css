@@ -1,0 +1,558 @@
+/* ═══════════════════════════════════════════════════
+   BUGGY THEMES
+   To change theme, edit the data-theme attribute on
+   the <html> tag in launcher.html and overlay.html,
+   or use the theme switcher buttons in the launcher.
+   ═══════════════════════════════════════════════════ */
+
+/* ── Custom font for buggy's dialogue ── */
+@font-face {
+  font-family: 'BuggyFont';
+  src: url('../assets/fonts/Bold-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── Theme 1: Forest (mossy greens, warm cream) ── */
+[data-theme="forest"] {
+  --bg: #2d3a2e;
+  --surface: #3d4f3e;
+  --accent: #a8c090;
+  --accent-text: #1a2a1b;
+  --accent2: #4a6340;
+  --text: #f0ead6;
+  --muted: #8a9e7a;
+  --shadow: rgba(0,0,0,0.5);
+  --pattern: none;
+}
+
+/* ── Theme 2: Baby Blue (soft sky, cotton whites) ── */
+[data-theme="babyblue"] {
+  --bg: #d6eaf8;
+  --surface: #eaf4fc;
+  --accent: #5dade2;
+  --accent-text: #1a4a6e;
+  --accent2: #aed6f1;
+  --text: #1a3a52;
+  --muted: #7fb3d3;
+  --shadow: rgba(93,173,226,0.25);
+  --pattern: none;
+}
+
+/* ── Theme 3: Gingham (classic check pattern) ── */
+[data-theme="gingham"] {
+  --bg: #fdf6f0;
+  --surface: #fff9f5;
+  --accent: #c0392b;
+  --accent-text: #fff;
+  --accent2: #fadbd8;
+  --text: #3d1c1c;
+  --muted: #b07070;
+  --shadow: rgba(192,57,43,0.15);
+  --pattern: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23fadbd8' opacity='0.6'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23fadbd8' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* ── Base styles (theme-independent) ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent2);
+  border-radius: 10px;
+  border: 2px solid var(--surface);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: transparent;
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.card {
+  background: var(--bg);
+  background-image: var(--pattern);
+  border-radius: 20px;
+  padding: 28px 26px;
+  width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  -webkit-app-region: no-drag;
+  position: relative;
+}
+
+/* ── Theme switcher pills ── */
+.theme-switcher {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
+}
+.theme-pill {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.theme-pill:hover { transform: scale(1.2); }
+.theme-pill.active { border-color: var(--text); transform: scale(1.1); }
+.theme-pill[data-t="forest"]   { background: #4a6340; }
+.theme-pill[data-t="babyblue"] { background: #5dade2; }
+.theme-pill[data-t="gingham"]  { background: #c0392b; }
+
+/* ── Close button ── */
+.close-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: none; border: none;
+  color: var(--muted); font-size: 16px;
+  cursor: pointer; padding: 4px 8px;
+  border-radius: 8px;
+  -webkit-app-region: no-drag;
+  z-index: 100;
+}
+.close-btn:hover { color: var(--text); background: var(--accent2); }
+
+/* ── Creature header ── */
+.creature-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.creature-sprite {
+  width: 64px; height: 64px;
+  border-radius: 14px;
+  background: var(--accent2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.creature-sprite img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.creature-speech {
+  background: var(--accent2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: 'BuggyFont', 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  flex: 1;
+  position: relative;
+  text-transform: uppercase;
+}
+.creature-speech::before {
+  content: '';
+  position: absolute;
+  left: -7px; top: 50%;
+  transform: translateY(-50%);
+  border: 7px solid transparent;
+  border-right-color: var(--accent2);
+  border-left: none;
+}
+
+/* ── Form elements ── */
+label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+input[type="text"] {
+  width: 100%;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: 'Segoe UI', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 18px;
+}
+input[type="text"]:focus { border-color: var(--accent); }
+input[type="text"]::placeholder { color: var(--muted); opacity: 0.7; }
+
+/* ── Duration row ── */
+.duration-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.duration-btn {
+  flex: 1;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 9px 0;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Segoe UI', sans-serif;
+}
+.duration-btn:hover { color: var(--text); border-color: var(--accent2); }
+.duration-btn.active {
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+  background: var(--accent2);
+}
+
+/* ── Mode buttons ── */
+.mode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.mode-btn {
+  flex: 1;
+  padding: 11px 10px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+  transition: all 0.15s;
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.4;
+}
+.mode-btn .mode-title { font-weight: 700; color: var(--text); margin-bottom: 3px; font-size: 13px; }
+.mode-btn:hover { border-color: var(--accent2); }
+.mode-btn.active { border-color: var(--accent); background: var(--accent2); }
+
+/* ── Site tags ── */
+.sites-area { margin-bottom: 18px; }
+.site-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 6px;
+  min-height: 0;
+}
+.site-tag {
+  background: var(--accent2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text);
+}
+.site-tag button {
+  background: none; border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0; line-height: 1;
+}
+.site-tag button:hover { color: var(--accent); }
+
+.site-input-row { display: flex; gap: 7px; }
+.site-input-row input { flex: 1; margin-bottom: 0; font-size: 12px; padding: 8px 12px; }
+.add-btn {
+  background: var(--accent2);
+  border: none; border-radius: 10px;
+  color: var(--text);
+  padding: 8px 14px;
+  cursor: pointer; font-size: 12px;
+  font-family: 'Segoe UI', sans-serif;
+}
+.add-btn:hover { background: var(--accent); color: var(--accent-text); }
+
+/* ── Start button ── */
+.start-btn {
+  width: 100%;
+  background: var(--accent);
+  border: none; border-radius: 12px;
+  color: var(--accent-text);
+  font-size: 15px; font-weight: 700;
+  padding: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: 'Segoe UI', sans-serif;
+}
+.start-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.start-btn:active { transform: translateY(0); }
+.start-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+/* ── Task input with quick pick ── */
+.task-input-wrapper {
+  position: relative;
+  display: flex;
+  gap: 0;
+}
+.task-input-wrapper input {
+  border-radius: 10px 0 0 10px;
+  margin-bottom: 0;
+}
+.quick-pick-btn {
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  padding: 0 12px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.15s;
+}
+.quick-pick-btn:hover { color: var(--text); background: var(--accent2); }
+.quick-pick-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px var(--shadow);
+  z-index: 100;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.quick-pick-dropdown.visible { display: block; }
+.quick-pick-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.quick-pick-item:hover { background: var(--accent2); }
+.quick-pick-empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.task-input-wrapper + .quick-pick-dropdown { position: relative; margin-bottom: 18px; }
+
+/* ── Custom duration ── */
+.custom-duration {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 0 8px;
+  transition: border-color 0.15s;
+}
+.custom-duration:focus-within, .custom-duration.active { border-color: var(--accent); background: var(--accent2); }
+.custom-duration input {
+  width: 50px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  padding: 9px 0;
+  outline: none;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+.custom-duration input::placeholder { color: var(--muted); opacity: 0.7; }
+.custom-duration span { color: var(--muted); font-size: 12px; }
+
+/* ── Preset buttons ── */
+.preset-sites {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+.preset-btn {
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Segoe UI', sans-serif;
+}
+.preset-btn:hover { border-color: var(--accent2); color: var(--text); }
+.preset-btn.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+/* ── Minimize button ── */
+.minimize-btn {
+  position: absolute;
+  top: 14px; right: 44px;
+  background: none; border: none;
+  color: var(--muted); font-size: 14px;
+  cursor: pointer; padding: 4px 8px;
+  border-radius: 8px;
+  -webkit-app-region: no-drag;
+  z-index: 100;
+}
+.minimize-btn:hover { color: var(--text); background: var(--accent2); }
+
+/* ── Stats section ── */
+.stats-section {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-hours {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stats-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stats-streak {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent2);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.streak-flame {
+  font-size: 14px;
+}
+
+.streak-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.streak-label {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── Garden visual ── */
+.stats-garden {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2px;
+  min-height: 50px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+
+.garden-flower {
+  font-size: 18px;
+  animation: sway 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.garden-flower:nth-child(odd) { animation-delay: -1.5s; }
+.garden-flower:nth-child(3n) { animation-delay: -0.7s; }
+.garden-flower.big { font-size: 24px; }
+.garden-flower.small { font-size: 14px; }
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+.garden-empty {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  padding: 10px;
+  font-style: italic;
+}
+
+/* ── Top sessions ── */
+.stats-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--accent2);
+}
+
+.stats-session-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 4px 0;
+}
+
+.session-task {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+
+.session-time {
+  color: var(--muted);
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.stats-empty {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  padding: 8px;
+}

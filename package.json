@@ -1,0 +1,36 @@
+{
+  "name": "buggy",
+  "version": "1.0.0",
+  "description": "A focus app with a snarky little creature",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "build:dir": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.buggy.focustimer",
+    "productName": "Buggy",
+    "files": [
+      "src/**/*"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "src/assets/sprites/icon.ico",
+      "sign": false,
+      "signDlls": false,
+      "verifyUpdateCodeSignature": false
+    },
+    "portable": {
+      "artifactName": "Buggy-Portable.exe"
+    }
+  }
+}

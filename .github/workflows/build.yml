@@ -1,0 +1,87 @@
+name: Build Buggy
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build for Windows
+        if: matrix.os == 'windows-latest'
+        run: npx electron-packager . Buggy --platform=win32 --arch=x64 --out=release --overwrite --icon=src/assets/sprites/icon.ico --ignore="dist.*|node_modules|\.git|\.claude|build.*|release"
+
+      - name: Build for macOS
+        if: matrix.os == 'macos-latest'
+        run: npx electron-packager . Buggy --platform=darwin --arch=x64,arm64 --out=release --overwrite --ignore="dist.*|node_modules|\.git|\.claude|build.*|release"
+
+      - name: Create Windows ZIP
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd release
+          powershell Compress-Archive -Path Buggy-win32-x64 -DestinationPath Buggy-Windows.zip
+
+      - name: Create macOS ZIP (Intel)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd release
+          zip -r Buggy-macOS-Intel.zip Buggy-darwin-x64
+
+      - name: Create macOS ZIP (Apple Silicon)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd release
+          zip -r Buggy-macOS-AppleSilicon.zip Buggy-darwin-arm64
+
+      - name: Upload Windows artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Buggy-Windows
+          path: release/Buggy-Windows.zip
+
+      - name: Upload macOS Intel artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Buggy-macOS-Intel
+          path: release/Buggy-macOS-Intel.zip
+
+      - name: Upload macOS Apple Silicon artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Buggy-macOS-AppleSilicon
+          path: release/Buggy-macOS-AppleSilicon.zip
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/Buggy-Windows.zip
+            release/Buggy-macOS-Intel.zip
+            release/Buggy-macOS-AppleSilicon.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
