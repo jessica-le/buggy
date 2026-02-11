@@ -6,6 +6,9 @@ on:
       - 'v*'  # Triggers on version tags like v1.0.0
   workflow_dispatch:  # Allows manual trigger
 
+permissions:
+  contents: write  # Required for creating releases
+
 jobs:
   build:
     strategy:
@@ -73,15 +76,26 @@ jobs:
           name: Buggy-macOS-AppleSilicon
           path: release/Buggy-macOS-AppleSilicon.zip
 
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/Buggy-Windows.zip
-            release/Buggy-macOS-Intel.zip
-            release/Buggy-macOS-AppleSilicon.zip
+            artifacts/Buggy-Windows/Buggy-Windows.zip
+            artifacts/Buggy-macOS-Intel/Buggy-macOS-Intel.zip
+            artifacts/Buggy-macOS-AppleSilicon/Buggy-macOS-AppleSilicon.zip
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
